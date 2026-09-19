@@ -2,21 +2,20 @@ from app import app
 import pytest
 import sqlite3
 import os
+from models import init_db
 
 @pytest.fixture
 def client():
     app.config['TESTING'] = True
-    with app.test_client() as client:
-        yield client
-
-def test_add_transaction(client):
     if os.path.exists('expenses.db'):
         os.remove('expenses.db')
-    
-    # Initialize DB for the test
-    from models import init_db
     init_db()
-    
+    with app.test_client() as client:
+        yield client
+    if os.path.exists('expenses.db'):
+        os.remove('expenses.db')
+
+def test_add_transaction(client):
     rv = client.post('/add', data={
         'transaction_type': 'Income',
         'category': 'Food',
@@ -37,6 +36,3 @@ def test_add_transaction(client):
     assert transaction[3] == 100.0
     assert transaction[4] == '2026-09-19'
     conn.close()
-    
-    if os.path.exists('expenses.db'):
-        os.remove('expenses.db')
