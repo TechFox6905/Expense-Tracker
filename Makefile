@@ -1,6 +1,6 @@
 # ╔══════════════════════════════════════════════════════════════╗
-# ║                    EXPENSE TRACKER                          ║
-# ║              Flask Development Makefile                    ║
+# ║                    EXPENSE TRACKER                           ║
+# ║              Flask Development Makefile                      ║
 # ╚══════════════════════════════════════════════════════════════╝
 
 
@@ -9,7 +9,7 @@
 # ────────────────────────────────────────────────────────────────
 
 PYTHON := python
-PIP := $(PYTHON) -m pip
+UV := uv
 
 
 # ────────────────────────────────────────────────────────────────
@@ -18,11 +18,16 @@ PIP := $(PYTHON) -m pip
 
 ## Install all project dependencies
 install:
-	$(PIP) install -r requirements.txt
+	$(UV) sync
 
-## Upgrade pip
-upgrade-pip:
-	$(PIP) install --upgrade pip
+## Install production dependencies only
+install-prod:
+	$(UV) sync --no-dev
+
+## Upgrade dependencies
+upgrade:
+	$(UV) lock --upgrade
+	$(UV) sync
 
 
 # ────────────────────────────────────────────────────────────────
@@ -31,15 +36,15 @@ upgrade-pip:
 
 ## Run the Flask application in development mode
 run:
-	flask --app app run --debug
+	$(UV) run flask --app expense_tracker.app run --debug
 
 ## Run Flask on all network interfaces
 run-host:
-	flask --app app run --debug --host=0.0.0.0
+	$(UV) run flask --app expense_tracker.app run --debug --host=0.0.0.0
 
 ## Run Flask on a custom port
 run-port:
-	flask --app app run --debug --port=8000
+	$(UV) run flask --app expense_tracker.app run --debug --port=8000
 
 
 # ────────────────────────────────────────────────────────────────
@@ -48,11 +53,42 @@ run-port:
 
 ## Run all tests
 test:
-	pytest
+	$(UV) run pytest
 
 ## Run tests with verbose output
 test-verbose:
-	pytest -v
+	$(UV) run pytest -v
+
+
+# ────────────────────────────────────────────────────────────────
+# 🔍 Linting & Formatting
+# ────────────────────────────────────────────────────────────────
+
+## Check code for linting errors
+lint:
+	$(UV) run ruff check .
+
+## Automatically fix linting errors
+lint-fix:
+	$(UV) run ruff check . --fix
+
+## Format the entire codebase
+format:
+	$(UV) run ruff format .
+
+## Check formatting without modifying files
+format-check:
+	$(UV) run ruff format . --check
+
+## Run linting and formatting
+check:
+	$(UV) run ruff check .
+	$(UV) run ruff format . --check
+
+## Fix linting and format the entire codebase
+fix:
+	$(UV) run ruff check . --fix
+	$(UV) run ruff format .
 
 
 # ────────────────────────────────────────────────────────────────
@@ -67,6 +103,13 @@ clean:
 clean-pytest:
 	rm -rf .pytest_cache
 
+## Remove Ruff cache
+clean-ruff:
+	rm -rf .ruff_cache
+
+## Remove all generated caches
+clean-all: clean clean-pytest clean-ruff
+
 
 # ────────────────────────────────────────────────────────────────
 # ℹ️  Help
@@ -79,7 +122,8 @@ help:
 	@echo "====================================="
 	@echo ""
 	@echo "  make install       Install dependencies"
-	@echo "  make upgrade-pip   Upgrade pip"
+	@echo "  make install-prod  Install production dependencies"
+	@echo "  make upgrade       Upgrade dependencies"
 	@echo ""
 	@echo "  make run           Run Flask application"
 	@echo "  make run-host      Run Flask on all interfaces"
@@ -88,6 +132,15 @@ help:
 	@echo "  make test          Run tests"
 	@echo "  make test-verbose  Run tests with verbose output"
 	@echo ""
+	@echo "  make lint          Check linting"
+	@echo "  make lint-fix      Fix linting errors"
+	@echo "  make format        Format code"
+	@echo "  make format-check  Check formatting"
+	@echo "  make check         Run lint + format check"
+	@echo "  make fix           Fix lint + format"
+	@echo ""
 	@echo "  make clean         Remove Python cache"
 	@echo "  make clean-pytest  Remove pytest cache"
+	@echo "  make clean-ruff    Remove Ruff cache"
+	@echo "  make clean-all     Remove all caches"
 	@echo ""

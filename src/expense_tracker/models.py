@@ -1,9 +1,10 @@
 import sqlite3
 
+
 def init_db():
-    conn = sqlite3.connect('expenses.db')
+    conn = sqlite3.connect("expenses.db")
     cursor = conn.cursor()
-    cursor.execute('''
+    cursor.execute("""
         CREATE TABLE IF NOT EXISTS transactions (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             transaction_type TEXT NOT NULL,
@@ -11,37 +12,48 @@ def init_db():
             amount REAL NOT NULL,
             date TEXT NOT NULL
         )
-    ''')
+    """)
     conn.commit()
     conn.close()
+
 
 def add_transaction(transaction_type, category, amount, date):
-    conn = sqlite3.connect('expenses.db')
+    conn = sqlite3.connect("expenses.db")
     cursor = conn.cursor()
-    cursor.execute('''
+    cursor.execute(
+        """
         INSERT INTO transactions (transaction_type, category, amount, date)
         VALUES (?, ?, ?, ?)
-    ''', (transaction_type, category, amount, date))
+    """,
+        (transaction_type, category, amount, date),
+    )
     conn.commit()
     conn.close()
 
+
 def get_transactions():
-    conn = sqlite3.connect('expenses.db')
+    conn = sqlite3.connect("expenses.db")
     cursor = conn.cursor()
-    cursor.execute('SELECT * FROM transactions ORDER BY date DESC')
+    cursor.execute("SELECT * FROM transactions ORDER BY date DESC")
     transactions = cursor.fetchall()
     conn.close()
     return transactions
 
+
 def get_totals():
-    conn = sqlite3.connect('expenses.db')
+    conn = sqlite3.connect("expenses.db")
     cursor = conn.cursor()
-    cursor.execute('SELECT SUM(amount) FROM transactions WHERE transaction_type = "Income"')
+    cursor.execute(
+        'SELECT SUM(amount) FROM transactions WHERE transaction_type = "Income"'
+    )
     total_income = cursor.fetchone()[0] or 0
-    cursor.execute('SELECT SUM(amount) FROM transactions WHERE transaction_type = "Expense"')
+    cursor.execute(
+        'SELECT SUM(amount) FROM transactions WHERE transaction_type = "Expense"'
+    )
     total_expense = cursor.fetchone()[0] or 0
     conn.close()
     return total_income, total_expense, total_income - total_expense
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     init_db()

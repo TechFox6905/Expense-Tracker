@@ -1,4 +1,13 @@
-.genesis
+__pycache__/
+*.py[cod]
 
-.pytest_cache
-__pycache__
+.ruff_cache/
+.pytest_cache/
+
+.venv/
+venv/
+
+.env
+.env.*
+
+instance/*.db
