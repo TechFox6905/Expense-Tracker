@@ -29,3 +29,25 @@ def test_dashboard_summary(client):
     
     if os.path.exists('expenses.db'):
         os.remove('expenses.db')
+
+def test_summary_update_after_transaction(client):
+    if os.path.exists('expenses.db'):
+        os.remove('expenses.db')
+    init_db()
+    
+    # Add initial
+    client.post('/add', data={'transaction_type': 'Income', 'category': 'Food', 'amount': 100.0, 'date': '2026-09-21'})
+    
+    # Check
+    rv = client.get('/')
+    assert b'100.0' in rv.data
+    
+    # Add second
+    client.post('/add', data={'transaction_type': 'Income', 'category': 'Food', 'amount': 50.0, 'date': '2026-09-22'})
+    
+    # Check updated
+    rv = client.get('/')
+    assert b'150.0' in rv.data # Income 100 + 50 = 150
+    
+    if os.path.exists('expenses.db'):
+        os.remove('expenses.db')

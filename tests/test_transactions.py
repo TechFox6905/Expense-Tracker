@@ -59,6 +59,23 @@ def test_add_expense(client):
     assert transaction[4] == '2026-09-20'
     conn.close()
 
+def test_invalid_transaction_type(client):
+    rv = client.post('/add', data={
+        'transaction_type': 'InvalidType',
+        'category': 'Food',
+        'amount': 100.0,
+        'date': '2026-09-23'
+    }, follow_redirects=True)
+    
+    assert rv.status_code != 200
+
+    # Verify not in DB
+    conn = sqlite3.connect('expenses.db')
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM transactions WHERE transaction_type = 'InvalidType';")
+    assert cursor.fetchone() is None
+    conn.close()
+
 def test_invalid_amount_form_submission(client):
     # Submit zero amount
     rv = client.post('/add', data={
@@ -74,5 +91,22 @@ def test_invalid_amount_form_submission(client):
     conn = sqlite3.connect('expenses.db')
     cursor = conn.cursor()
     cursor.execute("SELECT * FROM transactions WHERE date = '2026-09-22';")
+    assert cursor.fetchone() is None
+    conn.close()
+
+def test_invalid_category(client):
+    rv = client.post('/add', data={
+        'transaction_type': 'Income',
+        'category': 'InvalidCategory',
+        'amount': 100.0,
+        'date': '2026-09-24'
+    }, follow_redirects=True)
+    
+    assert rv.status_code != 200
+
+    # Verify not in DB
+    conn = sqlite3.connect('expenses.db')
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM transactions WHERE category = 'InvalidCategory';")
     assert cursor.fetchone() is None
     conn.close()
