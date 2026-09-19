@@ -9,6 +9,32 @@
 <body>
     <div class="container mt-5">
         <h1>Expense Tracker</h1>
+        <div class="row mt-4">
+            <div class="col-md-4">
+                <div class="card bg-success text-white">
+                    <div class="card-body">
+                        <h5>Total Income</h5>
+                        <p>{{ total_income }}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card bg-danger text-white">
+                    <div class="card-body">
+                        <h5>Total Expense</h5>
+                        <p>{{ total_expense }}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card bg-primary text-white">
+                    <div class="card-body">
+                        <h5>Balance</h5>
+                        <p>{{ balance }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
         <form action="/add" method="post" class="mt-4">
             <div class="mb-3">
                 <label for="transaction_type" class="form-label">Type</label>

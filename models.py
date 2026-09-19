@@ -33,5 +33,15 @@ def get_transactions():
     conn.close()
     return transactions
 
+def get_totals():
+    conn = sqlite3.connect('expenses.db')
+    cursor = conn.cursor()
+    cursor.execute('SELECT SUM(amount) FROM transactions WHERE transaction_type = "Income"')
+    total_income = cursor.fetchone()[0] or 0
+    cursor.execute('SELECT SUM(amount) FROM transactions WHERE transaction_type = "Expense"')
+    total_expense = cursor.fetchone()[0] or 0
+    conn.close()
+    return total_income, total_expense, total_income - total_expense
+
 if __name__ == '__main__':
     init_db()

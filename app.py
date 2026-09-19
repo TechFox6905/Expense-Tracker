@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, redirect, url_for
-from models import init_db, add_transaction, get_transactions
+from models import init_db, add_transaction, get_transactions, get_totals
 
 app = Flask(__name__)
 
@@ -9,7 +9,11 @@ init_db()
 @app.route('/')
 def index():
     transactions = get_transactions()
-    return render_template('index.html', transactions=transactions)
+    total_income, total_expense, balance = get_totals()
+    return render_template('index.html', transactions=transactions, 
+                           total_income=total_income, 
+                           total_expense=total_expense, 
+                           balance=balance)
 
 @app.route('/add', methods=['POST'])
 def add():
