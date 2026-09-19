@@ -19,9 +19,19 @@ def index():
 def add():
     transaction_type = request.form.get('transaction_type')
     category = request.form.get('category')
-    amount = float(request.form.get('amount'))
+    amount_str = request.form.get('amount')
     date = request.form.get('date')
     
+    if not transaction_type or not category or not amount_str or not date:
+        return "Invalid input", 400
+    
+    try:
+        amount = float(amount_str)
+        if amount <= 0:
+            return "Amount must be greater than 0", 400
+    except ValueError:
+        return "Invalid amount", 400
+        
     add_transaction(transaction_type, category, amount, date)
     return redirect(url_for('index'))
 

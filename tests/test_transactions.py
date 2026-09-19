@@ -36,3 +36,43 @@ def test_add_transaction(client):
     assert transaction[3] == 100.0
     assert transaction[4] == '2026-09-19'
     conn.close()
+
+def test_add_expense(client):
+    rv = client.post('/add', data={
+        'transaction_type': 'Expense',
+        'category': 'Transport',
+        'amount': 50.0,
+        'date': '2026-09-20'
+    }, follow_redirects=True)
+    
+    assert rv.status_code == 200
+    
+    # Verify in DB
+    conn = sqlite3.connect('expenses.db')
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM transactions WHERE transaction_type = 'Expense';")
+    transaction = cursor.fetchone()
+    assert transaction is not None
+    assert transaction[1] == 'Expense'
+    assert transaction[2] == 'Transport'
+    assert transaction[3] == 50.0
+    assert transaction[4] == '2026-09-20'
+    conn.close()
+
+def test_invalid_amount_form_submission(client):
+    # Submit zero amount
+    rv = client.post('/add', data={
+        'transaction_type': 'Income',
+        'category': 'Food',
+        'amount': 0.0,
+        'date': '2026-09-22'
+    }, follow_redirects=True)
+    
+    assert rv.status_code != 200
+    
+    # Verify not in DB
+    conn = sqlite3.connect('expenses.db')
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM transactions WHERE date = '2026-09-22';")
+    assert cursor.fetchone() is None
+    conn.close()
